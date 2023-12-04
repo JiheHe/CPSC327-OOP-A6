@@ -12,8 +12,10 @@ class Worker():
                   'w': (0, -1),    # all available build/move directions.
                   'nw': (-1, -1)}  # key: direction, value: (deltaRow, deltaCol) s.t. delta means change.
 
-  def __init__(self, start_location):
+  def __init__(self, worker_id, start_location):
+    self._id = worker_id
     self._current_location = start_location  # worker's location on the board, a tuple of 2 ints
+    Game.get_instance().update_worker_location(self._id, self._current_location)  # notify the game instance about the change.
 
   def _calculate_move(self, location_delta):
     '''
@@ -39,7 +41,7 @@ class Worker():
     legal_moves = []
     for direction, location_delta in Worker.WORKER_MOVES.items():
       new_location = self._calculate_move(location_delta)
-      if Game.instance.check_new_location_validity(new_location, action):
+      if Game.get_instance().check_new_location_validity(new_location, action):
         legal_moves.append(direction)
         
     return legal_moves
@@ -52,7 +54,7 @@ class Worker():
       Output:
         Boolean - whether the worker is on a level 3 building
     '''
-    return Game.instance.game_state[self._current_location[0]][self._current_location[1]] == 3
+    return Game.get_instance().game_state[self._current_location[0]][self._current_location[1]] == 3
   
   def move(self, direction):
     '''
@@ -61,6 +63,7 @@ class Worker():
         str - a LEGAL direction for the worker to move in
     '''
     self._current_location = self._calculate_move(self.WORKER_MOVES[direction])
+    Game.get_instance().update_worker_location(self._id, self._current_location)  # notify the game instance about the change.
 
   def build(self, direction):
     '''
@@ -69,5 +72,5 @@ class Worker():
         str - a LEGAL direction for the worker to build on
     '''
     build_location = self._calculate_move(self.WORKER_MOVES[direction])
-    Game.instance.game_state[build_location[0]][build_location[1]] += 1  # build!
+    Game.get_instance().game_state[build_location[0]][build_location[1]] += 1  # build!
       

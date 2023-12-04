@@ -19,9 +19,9 @@ class Player(metaclass=abc.ABCMeta):
     '''Reset the worker objects to their default positions through reinitialization'''
     # Too insignificant of a check to insert a new pattern.
     if self._color == 'white':
-      self._workers = {'A': Worker((3, 1)), 'B': Worker((1, 3))}
+      self._workers = {'A': Worker('A', (3, 1)), 'B': Worker('B', (1, 3))}
     elif self._color == 'blue':
-      self._workers = {'Y': Worker((1, 1)), 'Z': Worker((3, 3))}
+      self._workers = {'Y': Worker('Y', (1, 1)), 'Z': Worker('Z', (3, 3))}
 
   def execute_round(self):
     '''Execute a round of decision and movement for this player'''

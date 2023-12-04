@@ -28,12 +28,12 @@ class Game:
 
       return cls._instance
 
-  def _get_instance(cls):
+  @classmethod
+  def get_instance(cls):
       '''The getter method that returns the current Singleton Game instance'''
       # NOTE: no need to check for _instance & new if None, since our logic guarantees the existence of a game object
       # at the beginning. Again, singleton is only used for ease of reference here, not duplication reduction.
       return cls._instance
-  instance = property(_get_instance)  # for ease of publically-accessing notation
   #--------------------------------------------SINGLETON PORTION END--------------------------------------------#
   
 
@@ -44,8 +44,9 @@ class Game:
     '''
     # represent the gameboard and building levels as a 2D array of integers such that 0-3 represents the levels, and -1 represents a dome
     self._game_state = [[0 for j in range(5)] for i in range(5)]  # initialize to initial board state
+    # represent the worker placements as a dictionary of tuples s.t. the key is worker's letter, and the value is the worker's location
+    self._worker_locations = {}  # a dictionary of tuples, a READ-ONLY update board of locations.
 
-    # represent the worker placements as a dictionary of tuples s.t. the key is worker's letter, and the value is the worker object
     for player in self._players:   # initialize to initial worker locations
       player.initialize_workers()
 
@@ -56,6 +57,15 @@ class Game:
       '''The getter method that returns the _game_state object'''
       return self._game_state
   game_state = property(_get_game_state)  # for ease of publically-accessing notation
+
+  def update_worker_location(self, worker_id, new_location):
+    '''
+      The setter method that notifies the game to update worker location. This way we avoid exposing _workers and _locations
+      Input:
+        worker_id - str, the letter representation of worker's identity
+        new_location - tuple(int, int), the new location of the worker on the board
+    '''
+    self._worker_locations[worker_id] = new_location
 
   def _create_player_agent(self, type, color):
     from player import HumanPlayer, RandomPlayer, HeuristicPlayer  # using lazy import to avoid interdependency
@@ -80,12 +90,19 @@ class Game:
 
   def __str__(self):
     '''the board representation used for CLI'''
-    # TODO
-    pass
-    
-     
-# if __name__ == "__main__":
-#    test = Game("human", "heuristic", None, None)
-#    test2 = Game(True, True, False, False)
-#    print(test)
-#    print(test2)
+    # Update the board into a print state by fusing in workers
+    board_to_print = [[str(self._game_state[i][j]) + ' ' for j in range(5)] for i in range(5)]
+    for worker_id, location in self._worker_locations.items():
+      board_to_print[location[0]][location[1]] = board_to_print[location[0]][location[1]][0] + worker_id  # update the space with worker id at correct locations
+    # Print the board
+    board_representation = ""
+    for row in range(5):
+      board_representation += "+--+--+--+--+--+\n"
+      for col in range(5):
+         board_representation += "|" + board_to_print[row][col]
+      board_representation += "|\n"
+    board_representation += "+--+--+--+--+--+"
+    return board_representation
+  
+
+# Note: I hate running test in this... wasn't even a bug... just main stuff.
