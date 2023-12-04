@@ -105,5 +105,17 @@ class Game:
     board_representation += "+--+--+--+--+--+"
     return board_representation
   
+  def get_worker_location(self, worker_id):
+    '''
+      A simple getter return the location of the worker on the board.
+      How it works is that each worker keeps its own location private, but the
+      game has a viewable board of them. So the player will access the worker's
+      location from game. Sorta fits the observer pattern.
+      Input:
+        str - the id of the worker
+      Output:
+        tuple(int, int) - the location of the worker
+    '''
+    return self._worker_locations[worker_id] 
 
 # Note: I hate running test in this... wasn't even a bug... just main stuff.

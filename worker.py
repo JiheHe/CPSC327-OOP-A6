@@ -61,9 +61,13 @@ class Worker():
       Move the worker in the given direction and update its location
       Input:
         str - a LEGAL direction for the worker to move in
+      Output:
+        tuple(int, int) - the original location of the worker
     '''
+    old_location = self._current_location
     self._current_location = self._calculate_move(self.WORKER_MOVES[direction])
     Game.get_instance().update_worker_location(self._id, self._current_location)  # notify the game instance about the change.
+    return old_location
 
   def build(self, direction):
     '''
