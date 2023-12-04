@@ -79,5 +79,12 @@ class HeuristicPlayer(Player):
   '''Implement the automated heuristic AI Player using the Player interface.'''
   
   def _make_decision(self, legal_moves):
-    # TODO:
+    # look at each available move, calculates a move_score, and pick the highest one, breaking any ties randomly.
+    for worker_id, direction in legal_moves:
+      # cache the old location, move the new location
+
+      # calculuate height score: the sum of the heights of the buildings a player's workers stand on.
+      
+      # distance_score: the sum of the minimum distance to the opponent's workers
+
     pass
