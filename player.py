@@ -86,10 +86,22 @@ class HeuristicPlayer(Player):
   def _make_decision(self, legal_moves):
     # look at each available move, calculates a move_score, and pick the highest one, breaking any ties randomly.
     for worker_id, direction in legal_moves:
-      # cache the old location, move the new location
+      # cache the old location, move to new location
+      original_location = self._workers[worker_id].move(direction)
 
       # calculuate height score: the sum of the heights of the buildings a player's workers stand on.
+      height_score = 0
+      # center_score: how close the worker is from the center ring
+      center_score = 0
+      for worker_id in self._workers.keys():
+        worker_location = Game.get_instance().get_worker_location(worker_id)
+        height_score += Game.get_instance().game_state[worker_location[0]][worker_location[1]]
+
+      
       
       # distance_score: the sum of the minimum distance to the opponent's workers
+
+      # restore to old location
+
 
     pass
