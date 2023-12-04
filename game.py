@@ -86,8 +86,26 @@ class Game:
       Output:
         bool - True if location is valid for the action, False otherwise
     '''
-    # TODO (this is an important function)
-    pass
+ 
+    board_size = 5
+    # height of current location
+    level = self._game_state[old_location[0]][old_location[1]]
+    row, col = new_location[0], new_location[1]
+
+    # check if new location is outside of bounds
+    if row < 0 or row >= board_size or col < 0 or col >= board_size:
+      return False
+
+    # check if new location is occupied by a worker
+    if (row, col) in self._worker_locations.values():
+       return False
+
+    # level mismatch only for movement, bounded by level + 1
+    if action == "move" and self._game_state[row][col] > level + 1:
+       return False
+
+    return True
+
 
   def __str__(self):
     '''the board representation used for CLI'''
@@ -104,6 +122,28 @@ class Game:
       board_representation += "|\n"
     board_representation += "+--+--+--+--+--+"
     return board_representation
-  
+
+  def _next_turn(self):
+    self._turn_index = 0 if self._turn_index else 1
+
+  def run(self):
+    # while game is not over, players move
+    while True:
+      result = self._players[self._turn_index].execute_round()
+      if result != "none":
+        break
+      # iterator
+      self._next_turn()
+    
+    # get winner and print winner
+    # winner = self._players[(self._turn_index + (result == "lose")) % 2]
+    if result == "winner":
+      winner = self._players[self._turn_index]
+    else:
+      winner = self._players[(self._turn_index + 1) % 2]
+
+    print("{} has won".format(winner))
+
+
 
 # Note: I hate running test in this... wasn't even a bug... just main stuff.

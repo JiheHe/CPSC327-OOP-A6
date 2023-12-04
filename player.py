@@ -15,6 +15,9 @@ class Player(metaclass=abc.ABCMeta):
   def __init__(self, color):
     self._color = color
   
+  def __str__(self):
+    return self._color
+  
   def initialize_workers(self):
     '''Reset the worker objects to their default positions through reinitialization'''
     # Too insignificant of a check to insert a new pattern.
@@ -34,6 +37,8 @@ class Player(metaclass=abc.ABCMeta):
       pass
     else: # ongoing, result is a set of moves
       self._make_decision(result)
+      result = "none"
+    return result
       
   def _check_game_ongoing(self):
     for worker in self._workers.values():

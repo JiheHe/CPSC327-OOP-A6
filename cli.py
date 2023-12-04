@@ -23,9 +23,12 @@ class GameCLI:
     if player1 not in player_type or player2 not in player_type or undo_redo not in commands or enable_score not in commands:
       print("Command line error")
       return 1
-    test = Game(player1, player2, undo_redo, enable_score)
-
     
+    want_to_play = "yes"
+    while want_to_play == "yes":
+      test = Game(player1, player2, undo_redo, enable_score)
+      test.run()
+      want_to_play = input("Play again?")
 
 
 
