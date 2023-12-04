@@ -76,11 +76,12 @@ class Game:
     elif type == "random":
       return RandomPlayer(color)
 
-  def check_new_location_validity(self, location, action):
+  def check_new_location_validity(self, old_location, new_location, action):
     '''
       Check if the supplied location is a valid new location for the worker to move into, or build on
       Input:
-        location - tuple(int, int), the new location (row_id, col_id) the worker is moving into or building on
+        old_location - tuple(int, int), the old location (row_id, col_id) the worker is currently at
+        new_location - tuple(int, int), the new location (row_id, col_id) the worker is moving into or building on
         action - str, 'build' for building on and 'move' for moving into
       Output:
         bool - True if location is valid for the action, False otherwise

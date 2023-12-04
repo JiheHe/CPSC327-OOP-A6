@@ -41,7 +41,7 @@ class Worker():
     legal_moves = []
     for direction, location_delta in Worker.WORKER_MOVES.items():
       new_location = self._calculate_move(location_delta)
-      if Game.get_instance().check_new_location_validity(new_location, action):
+      if Game.get_instance().check_new_location_validity(self._current_location, new_location, action):
         legal_moves.append(direction)
         
     return legal_moves
