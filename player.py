@@ -89,17 +89,34 @@ class HeuristicPlayer(Player):
       # cache the old location, move to new location
       original_location = self._workers[worker_id].move(direction)
 
-      # calculuate height score: the sum of the heights of the buildings a player's workers stand on.
+      # height score: the sum of the heights of the buildings a player's workers stand on.
       height_score = 0
       # center_score: how close the worker is from the center ring
       center_score = 0
+      # distance_score: the sum of the minimum distance to the opponent's workers
+      distance_score = 0
+      opponent_workers = ['Y', 'Z'] if (self._color == "white") else ['A', 'B']
+
       for worker_id in self._workers.keys():
         worker_location = Game.get_instance().get_worker_location(worker_id)
-        height_score += Game.get_instance().game_state[worker_location[0]][worker_location[1]]
 
+        # height score
+        level = Game.get_instance().game_state[worker_location[0]][worker_location[1]]
+        height_score += 99999 if level == 3 else level  # level == 3 is win!!! big reward
+
+        # center score
+        if worker_location == (2, 2): # center space
+          center_score += 2
+        if abs(worker_location[0] - 2) <= 1 and abs(worker_location[1] - 2) <= 1:  # middle ring
+          center_score += 1
+
+        # distance score
+        for opponent_worker_id in opponent_workers:
+          opponent_worker_location = Game.get_instance().get_worker_location(opponent_worker_id)
+
+          # Check code and implement
       
       
-      # distance_score: the sum of the minimum distance to the opponent's workers
 
       # restore to old location
 
