@@ -3,6 +3,8 @@ import sys
 
 class GameCLI:
   def run(self):
+    '''Starts the CLI application'''
+    # library of values
     player_type = ["human", "heuristic", "random"]
     commands = ["on", "off"]
     args = sys.argv[1:]
@@ -24,10 +26,11 @@ class GameCLI:
       print("Command line error")
       return 1
     
+    # start the game cycle.
     want_to_play = "yes"
     while want_to_play == "yes":
-      test = Game(player1, player2, undo_redo, enable_score)
-      test.run()
+      game = Game(player1, player2, undo_redo, enable_score)  # should trigger the __new__ to overwrite the old game
+      game.run()
       want_to_play = input("Play again?")
 
 

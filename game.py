@@ -130,7 +130,7 @@ class Game:
     # while game is not over, players move
     while True:
       result = self._players[self._turn_index].execute_round()
-      if result != "none":
+      if result:  # != None
         break
       # iterator
       self._next_turn()

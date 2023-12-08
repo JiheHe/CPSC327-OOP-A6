@@ -29,16 +29,11 @@ class Player(metaclass=abc.ABCMeta):
   def execute_round(self):
     '''Execute a round of decision and movement for this player'''
     result = self._check_game_ongoing()
-    if result == "win":  # this player won the game
-      # TODO: print and prompt
-      pass
-    elif result == "lose":  # this player lost the game
-      # TODO: print and prompt
-      pass
+    if isinstance(result, str):
+      return result  # either "win" or "lose"
     else: # ongoing, result is a set of moves
       self._make_decision(result)
-      result = "none"
-    return result
+      return None
       
   def _check_game_ongoing(self):
     for worker in self._workers.values():
