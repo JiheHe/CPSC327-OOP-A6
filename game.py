@@ -18,7 +18,7 @@ class Game:
       This is valid since __new__ can be only accessed like __init__ and nowhere else. Again, for the ease of reference.'''
       # Sets up the singleton if not yet. The setup below only need to run once.
       if not cls._instance:
-          cls._instance  = super(Game, cls).__new__(cls)  # avoids self-looping when setting up an instance of self class.
+          cls._instance = super(Game, cls).__new__(cls)  # avoids self-looping when setting up an instance of self class.
           # Sets up player agents with correct types. Only need to init once since same agents throughout.
           cls._instance._players = [
               cls._instance._create_player_agent(p1_type, "white"),
