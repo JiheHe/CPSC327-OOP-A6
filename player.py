@@ -87,6 +87,10 @@ class Player(metaclass=abc.ABCMeta):
 
     return height_score, center_score, distance_score
 
+  def _generate_print_string(self, worker_id, direction, build_direction):
+    string_to_print = f"{worker_id},{direction},{build_direction}"
+    string_to_print += (" " + str(self.calculate_move_score_components())) if Game.get_instance().enable_score else ""
+    return string_to_print
       
   @abc.abstractmethod
   def make_decision(self, legal_moves):
@@ -104,7 +108,6 @@ class HumanPlayer(Player):
   '''Implement the interactive human Player using the Player interface.'''
 
   def make_decision(self, legal_moves):
-
     # select worker
     worker_id = ""
     workers = ["A", "B", "Y", "Z"]
@@ -145,9 +148,7 @@ class HumanPlayer(Player):
     
     worker.build(build)
 
-    string_to_print = f"{worker_id},{direction},{build}"
-    string_to_print += (" " + str(self.calculate_move_score_components())) if Game.get_instance().enable_score else ""
-    print(string_to_print)  # print the User's choice!
+    print(self._generate_print_string(self, worker_id, direction, build))  # print the outcome of User's choice!
 
 class RandomPlayer(Player):
   '''Implement the automated random AI Player using the Player interface.'''
@@ -159,9 +160,7 @@ class RandomPlayer(Player):
     build_direction = random.choice(self._workers[worker_id].find_legal_moves("build"))  # at least 1 exists
     self._workers[worker_id].build(build_direction)  # build a level there
 
-    string_to_print = f"{worker_id},{direction},{build_direction}"
-    string_to_print += (" " + str(self.calculate_move_score_components())) if Game.get_instance().enable_score else ""
-    print(string_to_print)  # print the User's choice!
+    print(self._generate_print_string(self, worker_id, direction, build_direction))  # print the outcome of User's choice!
 
 class HeuristicPlayer(Player):
   '''Implement the automated heuristic AI Player using the Player interface.'''
@@ -212,6 +211,4 @@ class HeuristicPlayer(Player):
     build_direction = random.choice(self._workers[worker_id].find_legal_moves("build"))  # at least 1 exists
     self._workers[worker_id].build(build_direction)  # build a level there
 
-    string_to_print = f"{worker_id},{direction},{build_direction}"
-    string_to_print += (" " + str(self.calculate_move_score_components())) if Game.get_instance().enable_score else ""
-    print(string_to_print)  # print the User's choice!
+    print(self._generate_print_string(self, worker_id, direction, build_direction))  # print the outcome of User's choice!
