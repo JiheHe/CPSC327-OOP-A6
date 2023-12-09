@@ -63,6 +63,40 @@ class HumanPlayer(Player):
 
   def _make_decision(self, legal_moves):
     # TODO: prompt user input, maybe through a subscriber model in CLI
+    workers = ["A", "B", "Y", "Z"]
+
+    # select worker
+    human_worker = ""
+    while human_worker not in self._workers:
+      human_worker = input("Select a worker to move")
+      if human_worker not in workers:
+        print("Not a valid worker")
+      elif human_worker not in self._workers:
+        print("That is not your worker")
+    human_worker = self._workers[human_worker] # needed?
+
+    # select direction and move
+    direction = ""
+    while direction not in human_worker.find_legal_moves('move'):
+      direction = input("Select a direction to move (n, ne, e, se, s, sw, w, nw)")
+      if direction not in Worker.WORKER_MOVES:
+        print("Not a valid direction")
+      elif direction not in human_worker.find_legal_moves('move'):
+        print("Cannot move {}".format(direction))
+    
+    human_worker.move(direction)
+
+    # selection where to build
+    build = ""
+    while build not in human_worker.find_legal_moves('build'):
+      build = input("Select a direction to build (n, ne, e, se, s, sw, w, nw)")
+      if build not in Worker.WORKER_MOVES:
+        print("Not a valid direction")
+      elif build not in human_worker.find_legal_moves('build'):
+        print("Canot build {}".format(build))
+    
+    human_worker.build(build)
+
     pass
 
 class RandomPlayer(Player):
