@@ -73,7 +73,7 @@ class HumanPlayer(Player):
         print("Not a valid worker")
       elif human_worker not in self._workers:
         print("That is not your worker")
-    human_worker = self._workers[human_worker] # needed?
+    human_worker = self._workers[human_worker] # needed
 
     # select direction and move
     direction = ""
@@ -93,11 +93,9 @@ class HumanPlayer(Player):
       if build not in Worker.WORKER_MOVES:
         print("Not a valid direction")
       elif build not in human_worker.find_legal_moves('build'):
-        print("Canot build {}".format(build))
+        print("Cannot build {}".format(build))
     
     human_worker.build(build)
-
-    pass
 
 class RandomPlayer(Player):
   '''Implement the automated random AI Player using the Player interface.'''
