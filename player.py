@@ -77,14 +77,14 @@ class Player(metaclass=abc.ABCMeta):
     for opponent_worker_id in opponent_workers:
       opponent_worker_location = Game.get_instance().get_worker_location(opponent_worker_id)
 
-      # def find_distance(worker_location, opponent_worker_location):
-      #   if
-
       # Going to use L1 distance as the distance metric.
       # List comprehension of formula. Ex. # Ex. for blue, it would be min(distance from Z to A, distance from Y to A) + min(distance from Z to B, distance from Y to B)
-      distance_score += min( [ (abs(opponent_worker_location[0]-worker_location[0]) + abs(opponent_worker_location[1]-worker_location[1]))
+      # Since we can move diagonally, the minimum distance between two points is just the maximum of dx and dy!
+      distance_score += min( [ max(abs(opponent_worker_location[0]-worker_location[0]), abs(opponent_worker_location[1]-worker_location[1]))
           for worker_location in [Game.get_instance().get_worker_location(worker_id) for worker_id in self._workers.keys()] ] )
       
+    distance_score = 8 - distance_score  # no clue why this works wtf
+
     return height_score, center_score, distance_score
 
       
@@ -145,8 +145,9 @@ class HumanPlayer(Player):
     
     worker.build(build)
 
-    print(f"{worker_id},{direction},{build}" + 
-          (" " + str(self.calculate_move_score_components())) if Game.get_instance().enable_score else "")  # print the User's choice!
+    string_to_print = f"{worker_id},{direction},{build}"
+    string_to_print += (" " + str(self.calculate_move_score_components())) if Game.get_instance().enable_score else ""
+    print(string_to_print)  # print the User's choice!
 
 class RandomPlayer(Player):
   '''Implement the automated random AI Player using the Player interface.'''
@@ -158,8 +159,9 @@ class RandomPlayer(Player):
     build_direction = random.choice(self._workers[worker_id].find_legal_moves("build"))  # at least 1 exists
     self._workers[worker_id].build(build_direction)  # build a level there
 
-    print(f"{worker_id},{direction},{build_direction}" + 
-          (" " + str(self.calculate_move_score_components())) if Game.get_instance().enable_score else "")  # print the User's choice!
+    string_to_print = f"{worker_id},{direction},{build_direction}"
+    string_to_print += (" " + str(self.calculate_move_score_components())) if Game.get_instance().enable_score else ""
+    print(string_to_print)  # print the User's choice!
 
 class HeuristicPlayer(Player):
   '''Implement the automated heuristic AI Player using the Player interface.'''
@@ -210,5 +212,6 @@ class HeuristicPlayer(Player):
     build_direction = random.choice(self._workers[worker_id].find_legal_moves("build"))  # at least 1 exists
     self._workers[worker_id].build(build_direction)  # build a level there
 
-    print(f"{worker_id},{direction},{build_direction}" + 
-          (" " + str(self.calculate_move_score_components())) if Game.get_instance().enable_score else "")  # print the User's choice!
+    string_to_print = f"{worker_id},{direction},{build_direction}"
+    string_to_print += (" " + str(self.calculate_move_score_components())) if Game.get_instance().enable_score else ""
+    print(string_to_print)  # print the User's choice!

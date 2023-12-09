@@ -125,11 +125,15 @@ class Game:
 
     # check if new location is occupied by a worker
     if (row, col) in self._worker_locations.values():
-       return False
+      return False
 
     # level mismatch only for movement, bounded by level + 1
     if action == "move" and self._game_state[row][col] > level + 1:
-       return False
+      return False
+    
+    # also can't build on dome
+    if action == "build" and self._game_state[row][col] == 4:
+      return False
 
     return True
 
