@@ -59,11 +59,15 @@ class GameCLI:
       print("Command line error")
       return 1
     
+    # Booleanize them.
+    undo_redo = False if undo_redo == "off" else True
+    enable_score = False if enable_score == "off" else True
+    
     # start the game cycle.
     want_to_play = "yes"
     while want_to_play == "yes":
       # the Originator set-up
-      self._game = Game(player1, player2)  # should trigger the __new__ to overwrite the old game
+      self._game = Game(player1, player2, enable_score)  # should trigger the __new__ to overwrite the old game
       redo_saves = []
 
       # Let CLI manage the game session. (Alternative: let Game manage it, and use try-except to break out)
@@ -94,7 +98,7 @@ class GameCLI:
           print("{} has won".format(winner))
           break
         else:  # game is on going. Use this window to ask.
-          # TODO: add post-choice print statements here.
+          # add post-choice print statements here.
           pass
 
       want_to_play = input("Play again?\n")

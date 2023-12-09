@@ -13,7 +13,7 @@ class Game:
   _instance = None  # the singleton game instance
 
   # NOTE: self works here, no need to @classmethod it. cls by convention.
-  def __new__(cls, p1_type, p2_type):  
+  def __new__(cls, p1_type, p2_type, enable_score):  
       '''With the current singleton logic, every time the object initialization is called, the object gets reset.
       This is valid since __new__ can be only accessed like __init__ and nowhere else. Again, for the ease of reference.'''
       # Sets up the singleton if not yet. The setup below only need to run once.
@@ -23,7 +23,8 @@ class Game:
           cls._instance._players = [
               cls._instance._create_player_agent(p1_type, "white"),
               cls._instance._create_player_agent(p2_type, "blue"),]
-          # Have decorator stuff here.
+          # Have other variables here
+          cls._instance._enable_score = enable_score
 
       # Sets up (or resets) the initial game state
       cls._instance._initialize_gameboard()
@@ -60,22 +61,28 @@ class Game:
     """
     Saves the current state inside a Memento game_save.
     """
-    return GameSave(self._game_state, self._worker_locations, self._players, self._turn_index)
+    return GameSave(self._game_state, self._worker_locations, self._players, self._enable_score, self._turn_index)
 
   def restore(self, game_save):
     """
     Restores the Originator's (Game's) state from a Memento object game_save.
     """
-    game_state, worker_locations, players, turn_index = game_save.get_overall_game_state()
+    game_state, worker_locations, players, enable_score, turn_index = game_save.get_overall_game_state()
     self._game_state = game_state  
     self._worker_locations = worker_locations  
     self._players = players
+    self._enable_score = enable_score
     self._turn_index = turn_index  
 
   def _get_game_state(self):
       '''The getter method that returns the _game_state object'''
       return self._game_state
   game_state = property(_get_game_state)  # for ease of publically-accessing notation
+
+  def _get_enable_score(self):
+      '''The getter method that returns the _enable_score bool'''
+      return self._enable_score
+  enable_score = property(_get_enable_score)  # for ease of publically-accessing notation
 
   def update_worker_location(self, worker_id, new_location):
     '''
@@ -146,6 +153,9 @@ class Game:
     workers = "AB" if actual_turn_index == 0 else "YZ"  # I'm sorry... I don't want to break encapsulation...
     # Remember the turn_index starts at 0. Gotta +1 at print to make it correct.
     board_representation += f"Turn: {self._turn_index+1}, {self._players[actual_turn_index]} ({workers})"
+    if self._enable_score:  # for debugging
+      board_representation += f", {str(self._players[actual_turn_index].calculate_move_score_components())}"
+
     return board_representation
 
   def _next_turn(self):
@@ -157,16 +167,21 @@ class Game:
 
     actual_turn_index = self._turn_index % 2  # even => 0, odd => 1. Remember that _turn_index is interpreted as _num_turns
 
-    result = self._players[actual_turn_index].execute_round()
-    if result:  # != None
+    # Check for results first (have each player inspect whether they win or lose)
+    result_current_player = self._players[actual_turn_index].check_game_ongoing()
+    result_opponent = self._players[abs(actual_turn_index-1)].check_game_ongoing()
+
+    if isinstance(result_current_player, str) or isinstance(result_opponent, str):
       # get winner and print winner
       # winner = self._players[(self._turn_index + (result == "lose")) % 2]
-      if result == "winner":
+      if result_current_player == "win" or result_opponent == "lose":
         winner = self._players[actual_turn_index]
-      else:
+      else:  # current player lose or result opponent == win
         winner = self._players[abs(actual_turn_index-1)]  # the opponent's index
       return winner
     else:  # game not ended yet!
+      # Execute a round of decision and movement for this player
+      self._players[actual_turn_index].make_decision(result_current_player)  
       self._next_turn()  # iterator
       # return None  # happens by default
   

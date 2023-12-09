@@ -25,17 +25,15 @@ class Player(metaclass=abc.ABCMeta):
       self._workers = {'A': Worker('A', (3, 1)), 'B': Worker('B', (1, 3))}
     elif self._color == 'blue':
       self._workers = {'Y': Worker('Y', (1, 1)), 'Z': Worker('Z', (3, 3))}
-
-  def execute_round(self):
-    '''Execute a round of decision and movement for this player'''
-    result = self._check_game_ongoing()
-    if isinstance(result, str):
-      return result  # either "win" or "lose"
-    else: # ongoing, result is a set of moves
-      self._make_decision(result)
-      return None
       
-  def _check_game_ongoing(self):
+  def check_game_ongoing(self):
+    '''
+      Checks if this player has win/lost the game
+      Output:
+        string "win" if win or "lose" if lose
+        OR
+        a list of legal moves
+    '''
     for worker in self._workers.values():
       if worker.on_winning_position():
         return "win"
@@ -45,9 +43,49 @@ class Player(metaclass=abc.ABCMeta):
     if len(moves) == 0:  # no legal moves available
       return "lose"
     return moves
+  
+  def calculate_move_score_components(self):
+    '''
+      Calculates then returns the (height_score, center_score, and distance_score) of the current player
+    '''
+    # NOTE (important):
+    # Does the distance refer to 2D distance, or does height count as well?
+
+    # height score: the sum of the heights of the buildings a player's workers stand on.
+    height_score = 0
+    # center_score: how close the worker is from the center ring
+    center_score = 0
+
+    for worker_id in self._workers.keys():
+      worker_location = Game.get_instance().get_worker_location(worker_id)
+
+      # height score
+      level = Game.get_instance().game_state[worker_location[0]][worker_location[1]]
+      height_score += 99999 if level == 3 else level  # level == 3 is win!!! big reward
+
+      # center score
+      if worker_location == (2, 2): # center space
+        center_score += 2
+      if abs(worker_location[0] - 2) <= 1 and abs(worker_location[1] - 2) <= 1:  # middle ring
+        center_score += 1
+
+    # distance_score: the sum of the minimum distance to the opponent's workers
+    distance_score = 0
+    opponent_workers = ['Y', 'Z'] if (self._color == "white") else ['A', 'B']
+
+    for opponent_worker_id in opponent_workers:
+      opponent_worker_location = Game.get_instance().get_worker_location(opponent_worker_id)
+
+      # Going to use L1 distance as the distance metric.
+      # List comprehension of formula. Ex. # Ex. for blue, it would be min(distance from Z to A, distance from Y to A) + min(distance from Z to B, distance from Y to B)
+      distance_score += min( [ abs(opponent_worker_location[0]-worker_location[0]) + abs(opponent_worker_location[1]-worker_location[1])
+          for worker_location in [Game.get_instance().get_worker_location(worker_id) for worker_id in self._workers.keys()] ] )
+      
+    return height_score, center_score, distance_score
+
       
   @abc.abstractmethod
-  def _make_decision(self, legal_moves):
+  def make_decision(self, legal_moves):
     '''
       Make a decision on which worker to move to where and build where for this step, then carry it out.
       Input:
@@ -61,8 +99,8 @@ class Player(metaclass=abc.ABCMeta):
 class HumanPlayer(Player):
   '''Implement the interactive human Player using the Player interface.'''
 
-  def _make_decision(self, legal_moves):
-    # TODO: prompt user input, maybe through a subscriber model in CLI
+  def make_decision(self, legal_moves):
+    # TODO: USE LEGAL_MOVES
     workers = ["A", "B", "Y", "Z"]
 
     # select worker
@@ -97,29 +135,28 @@ class HumanPlayer(Player):
     
     worker.build(build)
 
-    print(f"{worker_id},{direction},{build}")  # print the User's choice!
+    print(f"{worker_id},{direction},{build}" + 
+          (" " + str(self.calculate_move_score_components())) if Game.get_instance().enable_score else "")  # print the User's choice!
 
 class RandomPlayer(Player):
   '''Implement the automated random AI Player using the Player interface.'''
   
-  def _make_decision(self, legal_moves):
+  def make_decision(self, legal_moves):
     '''Randomly choose a move from the set of allowed moves'''
     worker_id, direction = random.choice(legal_moves)
     self._workers[worker_id].move(direction)  # update the worker location with legal move
     build_direction = random.choice(self._workers[worker_id].find_legal_moves("build"))  # at least 1 exists
     self._workers[worker_id].build(build_direction)  # build a level there
 
-    print(f"{worker_id},{direction},{build_direction}")  # print the User's choice!
+    print(f"{worker_id},{direction},{build_direction}" + 
+          (" " + str(self.calculate_move_score_components())) if Game.get_instance().enable_score else "")  # print the User's choice!
 
 class HeuristicPlayer(Player):
   '''Implement the automated heuristic AI Player using the Player interface.'''
   
-  def _make_decision(self, legal_moves):
+  def make_decision(self, legal_moves):
     # look at each available move, calculates a move_score, and pick the highest one, breaking any ties randomly.
     # then build randomly after (as answered on Ed)
-
-    # NOTE (important):
-    # Does the distance refer to 2D distance, or does height count as well?
 
     max_move_score_moves = []  # the cache during the calculation
     max_move_score = None  # the running max
@@ -128,35 +165,8 @@ class HeuristicPlayer(Player):
       # cache the old location, move to new location
       original_location = self._workers[worker_id].move(direction)
 
-      # height score: the sum of the heights of the buildings a player's workers stand on.
-      height_score = 0
-      # center_score: how close the worker is from the center ring
-      center_score = 0
-
-      for worker_id in self._workers.keys():
-        worker_location = Game.get_instance().get_worker_location(worker_id)
-
-        # height score
-        level = Game.get_instance().game_state[worker_location[0]][worker_location[1]]
-        height_score += 99999 if level == 3 else level  # level == 3 is win!!! big reward
-
-        # center score
-        if worker_location == (2, 2): # center space
-          center_score += 2
-        if abs(worker_location[0] - 2) <= 1 and abs(worker_location[1] - 2) <= 1:  # middle ring
-          center_score += 1
-
-      # distance_score: the sum of the minimum distance to the opponent's workers
-      distance_score = 0
-      opponent_workers = ['Y', 'Z'] if (self._color == "white") else ['A', 'B']
-
-      for opponent_worker_id in opponent_workers:
-        opponent_worker_location = Game.get_instance().get_worker_location(opponent_worker_id)
-
-        # Going to use L1 distance as the distance metric.
-        # List comprehension of formula. Ex. # Ex. for blue, it would be min(distance from Z to A, distance from Y to A) + min(distance from Z to B, distance from Y to B)
-        distance_score += min( [ abs(opponent_worker_location[0]-worker_location[0]) + abs(opponent_worker_location[1]-worker_location[1])
-           for worker_location in [Game.get_instance().get_worker_location(worker_id) for worker_id in self._workers.keys()] ] )
+      # calculate the components
+      height_score, center_score, distance_score = self.calculate_move_score_components()
 
       # parameter weights
       c1 = 3
@@ -190,4 +200,5 @@ class HeuristicPlayer(Player):
     build_direction = random.choice(self._workers[worker_id].find_legal_moves("build"))  # at least 1 exists
     self._workers[worker_id].build(build_direction)  # build a level there
 
-    print(f"{worker_id},{direction},{build_direction}")  # print the User's choice!
+    print(f"{worker_id},{direction},{build_direction}" + 
+          (" " + str(self.calculate_move_score_components())) if Game.get_instance().enable_score else "")  # print the User's choice!
