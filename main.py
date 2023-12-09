@@ -87,7 +87,8 @@ class SaveDecorator(Decorator):
       self._game_saves.append(self._cli._game.save())  # save the previous state
       self._redo_saves = []
     else:
-      pass # input error check for this?
+      print("INVALID INPUT")
+      return True
   
   def reset_game(self):
     '''Includes undo/redo state functionality'''
