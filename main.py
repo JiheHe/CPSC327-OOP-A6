@@ -41,15 +41,29 @@ class GameCLI:
     while want_to_play == "yes":
       # the Originator set-up
       self._game = Game(player1, player2, undo_redo, enable_score)  # should trigger the __new__ to overwrite the old game
-      self._game.run()
+
+      # Let CLI manage the game session. (Alternative: let Game manage it, and use try-except to break out)
+      while True: # while game is not over, players move
+        # pre-choice print statements
+        print(self._game)
+
+        winner = self._game.run_one_round()
+        if winner:  # game has ended!
+          print("{} has won".format(winner))
+          break
+        else:  # game is on going. Use this window to ask.
+          # TODO: add post-choice print statements here.
+          pass
+
       want_to_play = input("Play again?")
 
 
 
 if __name__=='__main__':
-  test = Game("human", "heuristic", None, None)
-  # test2 = Game(True, True, False, False)
-  # print(test2)
-  print(test)
-  test._players[0]._workers['A'].move('n')
-  print(test)
+  GameCLI().run()
+  # test = Game("human", "heuristic", None, None)
+  # # test2 = Game(True, True, False, False)
+  # # print(test2)
+  # print(test)
+  # test._players[0]._workers['A'].move('n')
+  # print(test)

@@ -44,7 +44,7 @@ class Player(metaclass=abc.ABCMeta):
       moves += [(id, move) for move in worker.find_legal_moves("move")]  # attach with worker id identifier.
     if len(moves) == 0:  # no legal moves available
       return "lose"
-    return set(moves)
+    return moves
       
   @abc.abstractmethod
   def _make_decision(self, legal_moves):
@@ -66,36 +66,38 @@ class HumanPlayer(Player):
     workers = ["A", "B", "Y", "Z"]
 
     # select worker
-    human_worker = ""
-    while human_worker not in self._workers:
-      human_worker = input("Select a worker to move")
-      if human_worker not in workers:
+    worker_id = ""
+    while worker_id not in self._workers:
+      worker_id = input("Select a worker to move\n")
+      if worker_id not in workers:
         print("Not a valid worker")
-      elif human_worker not in self._workers:
+      elif worker_id not in self._workers:
         print("That is not your worker")
-    human_worker = self._workers[human_worker] # needed
+    worker = self._workers[worker_id] # needed
 
     # select direction and move
     direction = ""
-    while direction not in human_worker.find_legal_moves('move'):
-      direction = input("Select a direction to move (n, ne, e, se, s, sw, w, nw)")
+    while direction not in worker.find_legal_moves('move'):
+      direction = input("Select a direction to move (n, ne, e, se, s, sw, w, nw)\n")
       if direction not in Worker.WORKER_MOVES:
         print("Not a valid direction")
-      elif direction not in human_worker.find_legal_moves('move'):
+      elif direction not in worker.find_legal_moves('move'):
         print("Cannot move {}".format(direction))
     
-    human_worker.move(direction)
+    worker.move(direction)
 
     # selection where to build
     build = ""
-    while build not in human_worker.find_legal_moves('build'):
-      build = input("Select a direction to build (n, ne, e, se, s, sw, w, nw)")
+    while build not in worker.find_legal_moves('build'):
+      build = input("Select a direction to build (n, ne, e, se, s, sw, w, nw)\n")
       if build not in Worker.WORKER_MOVES:
         print("Not a valid direction")
-      elif build not in human_worker.find_legal_moves('build'):
+      elif build not in worker.find_legal_moves('build'):
         print("Cannot build {}".format(build))
     
-    human_worker.build(build)
+    worker.build(build)
+
+    print(f"{worker_id},{direction},{build}")  # print the User's choice!
 
 class RandomPlayer(Player):
   '''Implement the automated random AI Player using the Player interface.'''
@@ -104,8 +106,10 @@ class RandomPlayer(Player):
     '''Randomly choose a move from the set of allowed moves'''
     worker_id, direction = random.choice(legal_moves)
     self._workers[worker_id].move(direction)  # update the worker location with legal move
-    build_direction = random.choice(set(self._workers[worker_id].find_legal_moves("build")))  # at least 1 exists
+    build_direction = random.choice(self._workers[worker_id].find_legal_moves("build"))  # at least 1 exists
     self._workers[worker_id].build(build_direction)  # build a level there
+
+    print(f"{worker_id},{direction},{build_direction}")  # print the User's choice!
 
 class HeuristicPlayer(Player):
   '''Implement the automated heuristic AI Player using the Player interface.'''
@@ -183,5 +187,7 @@ class HeuristicPlayer(Player):
     self._workers[worker_id].move(direction)
 
     # Build randomly (yes copy+paste same 2 lines of code from random. But only copied here so should be fine.)
-    build_direction = random.choice(set(self._workers[worker_id].find_legal_moves("build")))  # at least 1 exists
+    build_direction = random.choice(self._workers[worker_id].find_legal_moves("build"))  # at least 1 exists
     self._workers[worker_id].build(build_direction)  # build a level there
+
+    print(f"{worker_id},{direction},{build_direction}")  # print the User's choice!

@@ -53,6 +53,7 @@ class Game:
       player.initialize_workers()
 
     # represent the index of the player with the current turn in _players
+    # NOTE: interpret _turn_index as _num_turn. Going to adjust the logic accordingly!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     self._turn_index = 0  # starts with player 1
 
   def save(self):
@@ -138,32 +139,35 @@ class Game:
       for col in range(5):
          board_representation += "|" + board_to_print[row][col]
       board_representation += "|\n"
-    board_representation += "+--+--+--+--+--+"
+    board_representation += "+--+--+--+--+--+\n"
+
+    actual_turn_index = self._turn_index % 2
+    workers = "AB" if actual_turn_index == 0 else "YZ"  # I'm sorry... I don't want to break encapsulation...
+    # Remember the turn_index starts at 0. Gotta +1 at print to make it correct.
+    board_representation += f"Turn: {self._turn_index+1}, {self._players[actual_turn_index]} ({workers})"
     return board_representation
 
   def _next_turn(self):
     self._turn_index += 1
-    self._turn_index %= 2
+    # self._turn_index %= 2
 
-  def run(self):
-    # while game is not over, players move
-    while True:
-      result = self._players[self._turn_index].execute_round()
-      if result:  # != None
-        break
-      # iterator
-      self._next_turn()
-    
-    # get winner and print winner
-    # winner = self._players[(self._turn_index + (result == "lose")) % 2]
-    if result == "winner":
-      winner = self._players[self._turn_index]
-    else:
-      winner = self._players[(self._turn_index + 1) % 2]
+  def run_one_round(self):
+    '''Run one round of the game by telling the current player to take action'''
 
-    print("{} has won".format(winner))
+    actual_turn_index = self._turn_index % 2  # even => 0, odd => 1. Remember that _turn_index is interpreted as _num_turns
 
-
+    result = self._players[actual_turn_index].execute_round()
+    if result:  # != None
+      # get winner and print winner
+      # winner = self._players[(self._turn_index + (result == "lose")) % 2]
+      if result == "winner":
+        winner = self._players[actual_turn_index]
+      else:
+        winner = self._players[abs(actual_turn_index-1)]  # the opponent's index
+      return winner
+    else:  # game not ended yet!
+      self._next_turn()  # iterator
+      # return None  # happens by default
   
   def get_worker_location(self, worker_id):
     '''
