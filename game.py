@@ -13,7 +13,7 @@ class Game:
   _instance = None  # the singleton game instance
 
   # NOTE: self works here, no need to @classmethod it. cls by convention.
-  def __new__(cls, p1_type, p2_type, undo_redo, score_display):  # TODO: add more arguments to fit the design later.
+  def __new__(cls, p1_type, p2_type):  
       '''With the current singleton logic, every time the object initialization is called, the object gets reset.
       This is valid since __new__ can be only accessed like __init__ and nowhere else. Again, for the ease of reference.'''
       # Sets up the singleton if not yet. The setup below only need to run once.
@@ -152,8 +152,8 @@ class Game:
     self._turn_index += 1
     # self._turn_index %= 2
 
-  def run_one_round(self):
-    '''Run one round of the game by telling the current player to take action'''
+  def run_one_step(self):
+    '''Run one step of the game by telling the current player to take action'''
 
     actual_turn_index = self._turn_index % 2  # even => 0, odd => 1. Remember that _turn_index is interpreted as _num_turns
 
