@@ -1,3 +1,5 @@
+from save import GameSave
+
 class Game:
   '''
     The game object that runs an ongoing instance of Santorini.
@@ -52,6 +54,22 @@ class Game:
 
     # represent the index of the player with the current turn in _players
     self._turn_index = 0  # starts with player 1
+
+  def save(self):
+    """
+    Saves the current state inside a Memento game_save.
+    """
+    return GameSave(self._game_state, self._worker_locations, self._players, self._turn_index)
+
+  def restore(self, game_save):
+    """
+    Restores the Originator's (Game's) state from a Memento object game_save.
+    """
+    game_state, worker_locations, players, turn_index = game_save.get_overall_game_state()
+    self._game_state = game_state  
+    self._worker_locations = worker_locations  
+    self._players = players
+    self._turn_index = turn_index  
 
   def _get_game_state(self):
       '''The getter method that returns the _game_state object'''

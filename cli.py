@@ -2,6 +2,16 @@ from game import Game
 import sys
 
 class GameCLI:
+  """
+    The "Caretaker" of the Memento Design Pattern.
+    The Caretaker doesn't depend on the Concrete Memento GameSave. Therefore, it
+    doesn't have access to the originator's (Game's) state, stored inside the memento GameSave. It
+    works with all mementos via the base Memento interface.
+  """
+
+  def __init__(self):  # Have the game initialize the originator during run based on CLI args
+    self._game_saves = []  # ._mementos
+
   def run(self):
     '''Starts the CLI application'''
     # library of values
@@ -29,8 +39,9 @@ class GameCLI:
     # start the game cycle.
     want_to_play = "yes"
     while want_to_play == "yes":
-      game = Game(player1, player2, undo_redo, enable_score)  # should trigger the __new__ to overwrite the old game
-      game.run()
+      # the Originator set-up
+      self._game = Game(player1, player2, undo_redo, enable_score)  # should trigger the __new__ to overwrite the old game
+      self._game.run()
       want_to_play = input("Play again?")
 
 
