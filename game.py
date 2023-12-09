@@ -84,6 +84,7 @@ class Game:
         worker_id - str, the letter representation of worker's identity
         new_location - tuple(int, int), the new location of the worker on the board
     '''
+    # print(worker_id, new_location)
     self._worker_locations[worker_id] = new_location
 
   def _create_player_agent(self, type, color):
