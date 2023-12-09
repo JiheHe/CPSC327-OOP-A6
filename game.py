@@ -124,7 +124,8 @@ class Game:
     return board_representation
 
   def _next_turn(self):
-    self._turn_index = 0 if self._turn_index else 1
+    self._turn_index += 1
+    self._turn_index %= 2
 
   def run(self):
     # while game is not over, players move
