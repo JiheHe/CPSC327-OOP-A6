@@ -66,7 +66,7 @@ class Player(metaclass=abc.ABCMeta):
       # center score
       if worker_location == (2, 2): # center space
         center_score += 2
-      if abs(worker_location[0] - 2) <= 1 and abs(worker_location[1] - 2) <= 1:  # middle ring
+      elif abs(worker_location[0] - 2) <= 1 and abs(worker_location[1] - 2) <= 1:  # middle ring
         center_score += 1
 
     # distance_score: the sum of the minimum distance to the opponent's workers
