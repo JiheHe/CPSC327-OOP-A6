@@ -148,7 +148,7 @@ class HumanPlayer(Player):
     
     worker.build(build)
 
-    print(self._generate_print_string(self, worker_id, direction, build))  # print the outcome of User's choice!
+    print(self._generate_print_string(worker_id, direction, build))  # print the outcome of User's choice!
 
 class RandomPlayer(Player):
   '''Implement the automated random AI Player using the Player interface.'''
@@ -160,7 +160,7 @@ class RandomPlayer(Player):
     build_direction = random.choice(self._workers[worker_id].find_legal_moves("build"))  # at least 1 exists
     self._workers[worker_id].build(build_direction)  # build a level there
 
-    print(self._generate_print_string(self, worker_id, direction, build_direction))  # print the outcome of User's choice!
+    print(self._generate_print_string(worker_id, direction, build_direction))  # print the outcome of User's choice!
 
 class HeuristicPlayer(Player):
   '''Implement the automated heuristic AI Player using the Player interface.'''
@@ -211,4 +211,4 @@ class HeuristicPlayer(Player):
     build_direction = random.choice(self._workers[worker_id].find_legal_moves("build"))  # at least 1 exists
     self._workers[worker_id].build(build_direction)  # build a level there
 
-    print(self._generate_print_string(self, worker_id, direction, build_direction))  # print the outcome of User's choice!
+    print(self._generate_print_string(worker_id, direction, build_direction))  # print the outcome of User's choice!
