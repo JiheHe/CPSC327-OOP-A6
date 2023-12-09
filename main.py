@@ -55,7 +55,7 @@ class GameCLI:
           # TODO: add post-choice print statements here.
           pass
 
-      want_to_play = input("Play again?")
+      want_to_play = input("Play again?\n")
 
 
 
