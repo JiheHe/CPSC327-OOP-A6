@@ -80,6 +80,14 @@ class HeuristicPlayer(Player):
   
   def _make_decision(self, legal_moves):
     # look at each available move, calculates a move_score, and pick the highest one, breaking any ties randomly.
+    # then build randomly after (as answered on Ed)
+
+    # NOTE (important):
+    # Does the distance refer to 2D distance, or does height count as well?
+
+    max_move_score_moves = []  # the cache during the calculation
+    max_move_score = None  # the running max
+
     for worker_id, direction in legal_moves:
       # cache the old location, move to new location
       original_location = self._workers[worker_id].move(direction)
@@ -88,9 +96,6 @@ class HeuristicPlayer(Player):
       height_score = 0
       # center_score: how close the worker is from the center ring
       center_score = 0
-      # distance_score: the sum of the minimum distance to the opponent's workers
-      distance_score = 0
-      opponent_workers = ['Y', 'Z'] if (self._color == "white") else ['A', 'B']
 
       for worker_id in self._workers.keys():
         worker_location = Game.get_instance().get_worker_location(worker_id)
@@ -105,15 +110,46 @@ class HeuristicPlayer(Player):
         if abs(worker_location[0] - 2) <= 1 and abs(worker_location[1] - 2) <= 1:  # middle ring
           center_score += 1
 
-        # distance score
-        for opponent_worker_id in opponent_workers:
-          opponent_worker_location = Game.get_instance().get_worker_location(opponent_worker_id)
+      # distance_score: the sum of the minimum distance to the opponent's workers
+      distance_score = 0
+      opponent_workers = ['Y', 'Z'] if (self._color == "white") else ['A', 'B']
 
-          # Check code and implement
-      
-      
+      for opponent_worker_id in opponent_workers:
+        opponent_worker_location = Game.get_instance().get_worker_location(opponent_worker_id)
 
+        # Going to use L1 distance as the distance metric.
+        # List comprehension of formula. Ex. # Ex. for blue, it would be min(distance from Z to A, distance from Y to A) + min(distance from Z to B, distance from Y to B)
+        distance_score += min( [ abs(opponent_worker_location[0]-worker_location[0]) + abs(opponent_worker_location[1]-worker_location[1])
+           for worker_location in [Game.get_instance().get_worker_location(worker_id) for worker_id in self._workers.keys()] ] )
+
+      # parameter weights
+      c1 = 3
+      c2 = 2
+      c3 = 1
+
+      # calculuate the total move score
+      move_score = c1 * height_score + c2 * center_score + c3 * distance_score
+
+      # append the result to the cache, if it's a max
+      if not max_move_score:  # first value, the initial baseline
+        max_move_score = move_score
+        max_move_score_moves.append((worker_id, direction))
+      else:
+        if move_score > max_move_score:
+          max_move_score = move_score
+          max_move_score_moves = [(worker_id, direction)]  # resets the cache
+        elif move_score == max_move_score:
+          max_move_score_moves.append((worker_id, direction))  # a valid option
+      
       # restore to old location
+      self._workers[worker_id].move(original_location)
 
+    # Pick the move that has the maximum move_score (break tie randomly)
+    worker_id, direction = random.choice(max_move_score_moves)
+    
+    # Move the chosen worker to the chosen location (execute the chosen move)
+    self._workers[worker_id].move(direction)
 
-    pass
+    # Build randomly (yes copy+paste same 2 lines of code from random. But only copied here so should be fine.)
+    build_direction = random.choice(set(self._workers[worker_id].find_legal_moves("build")))  # at least 1 exists
+    self._workers[worker_id].build(build_direction)  # build a level there
