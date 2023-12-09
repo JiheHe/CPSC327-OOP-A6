@@ -61,7 +61,8 @@ class Player(metaclass=abc.ABCMeta):
 
       # height score
       level = Game.get_instance().game_state[worker_location[0]][worker_location[1]]
-      height_score += 99999 if level == 3 else level  # level == 3 is win!!! big reward
+      height_score += level
+      # height_score += 99999 if level == 3 else level  # level == 3 is win!!! big reward; nvm not needed by autograder
 
       # center score
       if worker_location == (2, 2): # center space
@@ -76,9 +77,12 @@ class Player(metaclass=abc.ABCMeta):
     for opponent_worker_id in opponent_workers:
       opponent_worker_location = Game.get_instance().get_worker_location(opponent_worker_id)
 
+      # def find_distance(worker_location, opponent_worker_location):
+      #   if
+
       # Going to use L1 distance as the distance metric.
       # List comprehension of formula. Ex. # Ex. for blue, it would be min(distance from Z to A, distance from Y to A) + min(distance from Z to B, distance from Y to B)
-      distance_score += min( [ abs(opponent_worker_location[0]-worker_location[0]) + abs(opponent_worker_location[1]-worker_location[1])
+      distance_score += min( [ (abs(opponent_worker_location[0]-worker_location[0]) + abs(opponent_worker_location[1]-worker_location[1]))
           for worker_location in [Game.get_instance().get_worker_location(worker_id) for worker_id in self._workers.keys()] ] )
       
     return height_score, center_score, distance_score
@@ -100,11 +104,10 @@ class HumanPlayer(Player):
   '''Implement the interactive human Player using the Player interface.'''
 
   def make_decision(self, legal_moves):
-    # TODO: USE LEGAL_MOVES
-    workers = ["A", "B", "Y", "Z"]
 
     # select worker
     worker_id = ""
+    workers = ["A", "B", "Y", "Z"]
     while worker_id not in self._workers:
       worker_id = input("Select a worker to move\n")
       if worker_id not in workers:
@@ -113,24 +116,31 @@ class HumanPlayer(Player):
         print("That is not your worker")
     worker = self._workers[worker_id] # needed
 
+    # take out the selected legal moves already precomputed
+    selected_legal_moves = []  # a list of strings
+    for legal_worker_id, direction in legal_moves:
+      if legal_worker_id == worker_id:
+        selected_legal_moves.append(direction)
+
     # select direction and move
     direction = ""
-    while direction not in worker.find_legal_moves('move'):
+    while direction not in selected_legal_moves:
       direction = input("Select a direction to move (n, ne, e, se, s, sw, w, nw)\n")
       if direction not in Worker.WORKER_MOVES:
         print("Not a valid direction")
-      elif direction not in worker.find_legal_moves('move'):
+      elif direction not in selected_legal_moves:
         print("Cannot move {}".format(direction))
     
     worker.move(direction)
 
     # selection where to build
     build = ""
-    while build not in worker.find_legal_moves('build'):
+    legal_builds = worker.find_legal_moves('build')
+    while build not in legal_builds:
       build = input("Select a direction to build (n, ne, e, se, s, sw, w, nw)\n")
       if build not in Worker.WORKER_MOVES:
         print("Not a valid direction")
-      elif build not in worker.find_legal_moves('build'):
+      elif build not in legal_builds:
         print("Cannot build {}".format(build))
     
     worker.build(build)
